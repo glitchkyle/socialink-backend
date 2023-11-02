@@ -1,2 +1,2 @@
 # Configuration Directory
-Contains configuration files, such as the database configuration file 
+Contains configuration files, such as the environment variable file and logger instance
