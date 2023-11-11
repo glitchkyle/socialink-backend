@@ -3,7 +3,7 @@ import { envs } from "../../config/env";
 
 export const PostgresDataSource = new DataSource({
     type: "postgres",
-    entities: ["src/entities/**/*.model{.ts,.js}"],
+    entities: ["src/entities/**/*.entity{.ts,.js}"],
     synchronize: false,
     migrations: ["src/database/migrations/**/*{.ts,.js}"],
     host: envs.DB_HOST,
