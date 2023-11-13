@@ -7,14 +7,10 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=development
-      - SERVER_PORT=8000
       - DB_HOST=pg-db
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=postgres
     depends_on:
       - pg-db
   pg-db:
