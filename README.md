@@ -7,7 +7,8 @@
 3. Create an environment variable file `.env` in the root directory using `touch .env`.
 4. Copy the latest environment variables on to the `.env`
 5. Start the development container `docker-compose up --build -d`
-6. Setup the database `npm run migration:run`
+6. Run `npm install` to install project dependencies
+7. Setup the database `npm run migration:run`
 8. Code away!
 
 ## TypeORM Migrations
