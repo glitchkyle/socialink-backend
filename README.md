@@ -35,7 +35,7 @@ npm run migration:run
 npm run migration:revert
 ```
 
-## Drop Database (Development)
+### Drop Database (Development)
 ```bash
 npm run schema:drop
 ```
