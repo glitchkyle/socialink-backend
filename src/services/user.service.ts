@@ -5,7 +5,7 @@ import Auth from "../entities/auth.entity";
 import User from "../entities/user.entity";
 import { UserRepository } from "../repositories/user.repository";
 import { AuthRepository } from "../repositories/auth.repository";
-import { MissingFieldError } from "../handlers/error";
+import { MissingFieldError, RejectedRequestError } from "../handlers/error";
 
 export async function findOrCreateNewAuthenticatedUser({
     claims,
@@ -37,16 +37,27 @@ export async function findOrCreateNewAuthenticatedUser({
 
         return user;
     } else {
-        const { nickname, name, email, picture, locale } = claims;
-        const newUser = User.create({
-            fullName: name,
-            username: nickname,
-            profilePictureUrl: picture,
-            email,
-            locale,
-        });
+        const { email } = claims;
 
-        const user = await UserRepository.createUser(newUser);
+        if (!email)
+            throw new RejectedRequestError("Email is required for all users");
+
+        // Finding another user with same email because it is possible for users to
+        // authenticate with another identity provider but still have the same identity
+        let user = await UserRepository.findUserByEmail(email);
+
+        if (!user) {
+            const { nickname, name, picture, locale } = claims;
+            const newUser = User.create({
+                email,
+                fullName: name,
+                username: nickname,
+                profilePictureUrl: picture,
+                locale,
+            });
+
+            user = await UserRepository.createUser(newUser);
+        }
 
         const newAuth = Auth.create({
             user,

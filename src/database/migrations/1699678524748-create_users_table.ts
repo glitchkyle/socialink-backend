@@ -26,6 +26,7 @@ export class createUserTable1687273740382 implements MigrationInterface {
                     {
                         name: "username",
                         type: "varchar",
+                        isNullable: true,
                     },
                     {
                         name: "email",
@@ -35,20 +36,17 @@ export class createUserTable1687273740382 implements MigrationInterface {
                     {
                         name: "full_name",
                         type: "varchar",
+                        isNullable: true,
                     },
                     {
                         name: "profile_picture_url",
                         type: "varchar",
+                        isNullable: true,
                     },
                     {
                         name: "locale",
                         type: "varchar",
-                    },
-                    {
-                        name: "role",
-                        type: "enum",
-                        enum: ["Regular", "Admin"],
-                        default: "'Regular'",
+                        isNullable: true,
                     },
                 ],
             })
