@@ -33,24 +33,24 @@ export class CreateAuthTable1699678529357 implements MigrationInterface {
                         type: "uuid",
                     },
                     {
-                        name: "auth_id",
+                        name: "subject_id",
                         type: "varchar",
                         isUnique: true,
                     },
                     {
-                        name: "auth_access_token",
+                        name: "access_token",
                         type: "varchar",
                         isNullable: true,
                         default: null,
                     },
                     {
-                        name: "auth_refresh_token",
+                        name: "refresh_token",
                         type: "varchar",
                         isNullable: true,
                         default: null,
                     },
                     {
-                        name: "auth_access_token_expires_at",
+                        name: "access_token_expires_at",
                         type: "timestamp",
                         isNullable: true,
                         default: null,

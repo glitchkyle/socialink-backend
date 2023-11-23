@@ -1,5 +1,9 @@
 # Socialink Backend Repository
 
+Socialink is a simple social media web application that allows users to interact with each other through posts!
+
+This repository contains the API server component for the application.
+
 ## Setup
 
 1. Clone the latest version of the repository `git clone https://github.com/glitchkyle/socialink-backend.git`

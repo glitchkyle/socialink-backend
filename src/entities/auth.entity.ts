@@ -14,21 +14,21 @@ export default class Auth extends BaseEntityModel {
     // OAuth provider for the authenticated user. It allows you to link
     // the user's authentication information to their corresponding account
     // in your application's database.
-    @Column({ name: "auth_id", unique: true })
+    @Column({ name: "subject_id", unique: true })
     @IsNotEmpty()
     @IsString()
-    authId: string;
+    subjectId: string;
 
     // This field stores the access token obtained during the OAuth authentication
     // process. The access token is used to access protected resources on behalf of
     // the user and typically has a limited lifespan.
     @Column({
         type: "text",
-        name: "auth_access_token",
+        name: "access_token",
         nullable: true,
         default: null,
     })
-    authAccessToken: string | null;
+    accessToken: string | null;
 
     // This field stores the refresh token obtained during the OAuth authentication
     // process. The refresh token is used to obtain a new access token when the current
@@ -36,20 +36,20 @@ export default class Auth extends BaseEntityModel {
     // requiring the user to reauthenticate.
     @Column({
         type: "text",
-        name: "auth_refresh_token",
+        name: "refresh_token",
         nullable: true,
         default: null,
     })
-    authRefreshToken: string | null;
+    refreshToken: string | null;
 
     // This field stores the expiration time of the OAuth access token. It helps track
     // when the access token will expire, allowing you to handle token refresh operations
     // efficiently and ensure uninterrupted access to the user's resources.
     @Column({
         type: "timestamptz",
-        name: "auth_access_token_expires_at",
+        name: "access_token_expires_at",
         nullable: true,
         default: null,
     })
-    authAccessTokenExpiresAt: Date | null;
+    accessTokenExpiresAt: Date | null;
 }

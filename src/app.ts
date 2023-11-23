@@ -4,7 +4,9 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import "reflect-metadata";
 import { rateLimit } from "express-rate-limit";
-import { auth } from "express-openid-connect";
+import { Session, auth } from "express-openid-connect";
+import { decodeJwt } from "jose";
+import { UserinfoResponse } from "openid-client";
 
 import Logger from "./config/logger";
 import Morgan from "./config/morgan";
@@ -13,6 +15,7 @@ import { PostgresDataSource } from "./database/datasources/postgres.datasource";
 import postRouter from "./routes/post.route";
 import errorLogger from "./middlewares/errorLogger";
 import errorFormatter from "./middlewares/errorFormatter";
+import { findOrCreateNewAuthenticatedUser } from "./services/user.service";
 
 const app = express();
 const port = envs.PORT;
@@ -34,6 +37,23 @@ const config = {
     baseURL: envs.BASE_URL,
     clientID: envs.CLIENT_ID,
     secret: envs.SECRET,
+    clientSecret: envs.CLIENT_SECRET,
+    authorizationParams: {
+        response_type: "code id_token",
+        audience: envs.AUDIENCE,
+        scope: "openid profile email read:posts create:posts delete:posts",
+    },
+    afterCallback: async (req: Request, res: Response, session: Session) => {
+        const claims = decodeJwt<UserinfoResponse>(session.id_token);
+        await findOrCreateNewAuthenticatedUser({
+            claims,
+            accessToken: session.access_token,
+            refreshToken: session.refresh_token,
+            accessTokenExpiry: session.expires_at,
+        });
+
+        return session;
+    },
 };
 
 app.use(auth(config));
@@ -62,8 +82,8 @@ app.use(
     })
 );
 
-app.use("/post", postRouter);
-
+// Mount Routers
+app.use("/posts", postRouter);
 app.get("/", (req: Request, res: Response) => {
     res.send("Socialink API Server V1.0.0");
 });

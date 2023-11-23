@@ -7,6 +7,8 @@ import {
     getPaginatedPosts,
 } from "../services/post.service";
 import { PostReqBody } from "../types/controllers/post.controller.type";
+import { findUserByEmail } from "../services/user.service";
+import { ResourceNotFoundError, UnauthenticatedError } from "../handlers/error";
 
 // @desc    Gets posts through pagination
 // @route   GET /post?pageNumber&pageSize
@@ -37,8 +39,12 @@ export const createPost = asyncHandler(
         res: Response,
         next: NextFunction
     ) => {
-        const { user, body } = req;
+        const { body, oidc } = req;
         const { content } = body;
+
+        if (!oidc.user) throw new UnauthenticatedError();
+        const user = await findUserByEmail({ email: oidc.user.email });
+        if (!user) throw new ResourceNotFoundError();
 
         const post = await createNewPost({
             content: content,

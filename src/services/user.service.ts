@@ -1,53 +1,69 @@
-import { validate } from "class-validator";
+import { UserinfoResponse } from "openid-client";
 
 import Logger from "../config/logger";
 import Auth from "../entities/auth.entity";
 import User from "../entities/user.entity";
 import { UserRepository } from "../repositories/user.repository";
 import { AuthRepository } from "../repositories/auth.repository";
-import { ValidationException } from "../handlers/error";
+import { MissingFieldError } from "../handlers/error";
 
-export async function createNewAuthenticatedUser({
-    username,
-    email,
-    fullName,
-    profilePictureUrl,
-    locale,
-    sub,
+export async function findOrCreateNewAuthenticatedUser({
+    claims,
+    accessToken,
+    refreshToken,
+    accessTokenExpiry,
 }: {
-    // User information
-    username: string;
-    email: string;
-    fullName: string;
-    profilePictureUrl: string;
-    locale: string;
-    // Auth information
-    sub: string;
-}) {
-    Logger.debug("Creating new authenticated user");
+    claims: UserinfoResponse;
+    accessToken: string;
+    refreshToken: string;
+    accessTokenExpiry: string;
+}): Promise<User> {
+    Logger.debug("Finding or creating new authenticated user");
 
-    const newUser = User.create({
-        username,
-        email,
-        fullName,
-        profilePictureUrl,
-        locale,
-    });
+    const { sub } = claims;
 
-    const userErrors = await validate(newUser);
-    if (userErrors.length) throw new ValidationException(userErrors);
+    const authUser = await AuthRepository.findAuthUserByAuthSubjectId(sub);
 
-    const user = await UserRepository.createUser(newUser);
+    if (authUser) {
+        const { user } = authUser;
 
-    const newAuth = Auth.create({
-        user,
-        authId: sub,
-    });
+        if (!user) throw new MissingFieldError();
 
-    const authErrors = await validate(newAuth);
-    if (authErrors.length) throw new ValidationException(authErrors);
+        await AuthRepository.updateAccessTokenBySubjectId({
+            subjectId: sub,
+            accessToken,
+            accessTokenExpiry,
+        });
 
-    await AuthRepository.createAuth(newAuth);
+        return user;
+    } else {
+        const { nickname, name, email, picture, locale } = claims;
+        const newUser = User.create({
+            fullName: name,
+            username: nickname,
+            profilePictureUrl: picture,
+            email,
+            locale,
+        });
 
-    return user;
+        const user = await UserRepository.createUser(newUser);
+
+        const newAuth = Auth.create({
+            user,
+            subjectId: sub,
+            accessToken,
+            refreshToken,
+            accessTokenExpiresAt: new Date(Number(accessTokenExpiry) * 1000),
+        });
+
+        await AuthRepository.createAuth(newAuth);
+
+        return user;
+    }
+}
+
+export async function findUserByEmail({ email }: { email: string }) {
+    Logger.debug(`Finding user by email ${email}`);
+
+    return await UserRepository.findUserByEmail(email);
 }
